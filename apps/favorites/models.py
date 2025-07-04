@@ -17,6 +17,6 @@ class Favorite(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'car')
+        unique_together = ('user', 'vehicle')
         ordering = ['-added_at']
 
