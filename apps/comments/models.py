@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from vehicles.models import Car
+from vehicles.models import Vehicle
 
 class Comment(models.Model):
 
@@ -9,8 +9,8 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments'
     )
-    car = models.ForeignKey(
-        Car,
+    vehicle = models.ForeignKey(
+        Vehicle,
         on_delete=models.CASCADE,
         related_name='comments'
     )

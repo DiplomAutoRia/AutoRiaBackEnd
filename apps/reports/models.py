@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from vehicles.models import Car
+from vehicles.models import Vehicle
 
 
 class Report(models.Model):
@@ -10,8 +10,8 @@ class Report(models.Model):
         on_delete=models.CASCADE,
         related_name='reports'
     )
-    car = models.ForeignKey(
-        Car,
+    vehicle = models.ForeignKey(
+        Vehicle,
         on_delete=models.CASCADE,
         related_name='reports'
     )

@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from vehicles.models import Car
+from vehicles.models import Vehicle
 
 class Message(models.Model):
     sender = models.ForeignKey(
@@ -13,8 +13,8 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         related_name='received_messages'
     )
-    car = models.ForeignKey(
-        Car,
+    vehicle = models.ForeignKey(
+        Vehicle,
         on_delete=models.SET_NULL,
         related_name='messages',
         null=True,
