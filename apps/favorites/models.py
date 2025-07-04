@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from cars.models import Car
+from vehicles.models import Car
 
 class Favorite(models.Model):
     
@@ -20,5 +20,3 @@ class Favorite(models.Model):
         unique_together = ('user', 'car')
         ordering = ['-added_at']
 
-    def __str__(self):
-        return f"Обране: {self.user.email} - {self.car.brand} {self.car.model}"

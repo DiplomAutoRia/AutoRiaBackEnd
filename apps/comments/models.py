@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from cars.models import Car
+from vehicles.models import Car
 
 class Comment(models.Model):
 
@@ -18,6 +18,4 @@ class Comment(models.Model):
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Відгук {self.user} для {self.car} — {self.rating}★"
 

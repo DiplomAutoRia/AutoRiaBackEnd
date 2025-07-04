@@ -13,10 +13,10 @@ class Vehicle(models.Model):
     description = models.TextField()
     location = models.CharField(max_length=100)
 
-    mileage = models.PositiveIntegerField(null=True, blank=True, help_text="Пробіг у км")
+    mileage = models.PositiveIntegerField(null=True, blank=True)
     color = models.CharField(max_length=30, null=True, blank=True)
-    engine_volume = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True, help_text="Обʼєм у літрах")
-    engine_power = models.PositiveIntegerField(null=True, blank=True, help_text="Потужність у к.с.")
+    engine_volume = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True)
+    engine_power = models.PositiveIntegerField(null=True, blank=True)
     fuel_type = models.CharField(max_length=20, null=True, blank=True)
     transmission = models.CharField(max_length=20, null=True, blank=True)
 
@@ -54,11 +54,11 @@ class Car(Vehicle):
 
 class Motorcycle(Vehicle):
     bike_type = models.CharField(max_length=30, null=True, blank=True)
-    seat_height = models.PositiveIntegerField(null=True, blank=True, help_text="В мм")
+    seat_height = models.PositiveIntegerField(null=True, blank=True)
 
 
 class Truck(Vehicle):
-    load_capacity = models.PositiveIntegerField(help_text="В кг")
+    load_capacity = models.PositiveIntegerField()
     axle_count = models.PositiveIntegerField(null=True, blank=True)
 
 
@@ -86,7 +86,7 @@ class WaterTransport(Vehicle):
 class AirTransport(Vehicle):
     aircraft_type = models.CharField(max_length=50)
     engine_count = models.PositiveIntegerField()
-    max_altitude = models.PositiveIntegerField(null=True, blank=True, help_text="Макс. висота, м")
+    max_altitude = models.PositiveIntegerField(null=True, blank=True)
 
 
 class Motorhome(Vehicle):

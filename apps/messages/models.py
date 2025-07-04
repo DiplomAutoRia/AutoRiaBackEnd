@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from cars.models import Car
+from vehicles.models import Car
 
 class Message(models.Model):
     sender = models.ForeignKey(
@@ -27,5 +27,3 @@ class Message(models.Model):
     class Meta:
         ordering = ['timestamp']
 
-    def __str__(self):
-        return f"Повідомлення від {self.sender.email} до {self.receiver.email} — {self.timestamp.strftime('%Y-%m-%d %H:%M')}"
