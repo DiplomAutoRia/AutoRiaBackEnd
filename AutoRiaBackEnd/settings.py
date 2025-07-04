@@ -40,12 +40,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
-    'users',
-    'cars',
-    'favorites',
-    'messages',
-    'comments',
-    'reports',
+    'apps.users',
+    'apps.vehicles',
+    'apps.favorites',
+    'apps.user_messages',
+    'apps.comments',
+    'apps.reports',
 ]
 
 MIDDLEWARE = [
