@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import pymysql
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 pymysql.install_as_MySQLdb()
 
@@ -50,6 +54,7 @@ INSTALLED_APPS = [
     'apps.favorites',
     'apps.user_messages',
     'apps.reports',
+    'sendgrid_backend',
 ]
 
 MIDDLEWARE = [
@@ -89,9 +94,9 @@ WSGI_APPLICATION = 'AutoRiaBackEnd.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'diplomautoria',
+        'NAME': 'diplom_autoria',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': '490IJT9y',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -128,6 +133,21 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = 'users.User'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+DEFAULT_FROM_EMAIL = 'no-reply@autodiplom.pp.ua'
+
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_NUMBER = '+19383002909'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
