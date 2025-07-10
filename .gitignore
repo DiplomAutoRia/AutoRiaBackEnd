@@ -15,7 +15,7 @@ build/
 *.log
 *.pot
 *.mo
-local_settings.py
+settings.py
 
 # База даних (SQLite)
 db.sqlite3
