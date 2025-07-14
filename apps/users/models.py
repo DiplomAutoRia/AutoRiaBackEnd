@@ -9,18 +9,17 @@ ROLE_CHOICES = [
 
 class User(AbstractUser):
     
-    email = models.EmailField(unique=True, verbose_name='Email', help_text="User's unique email address")
-    phone_number = models.CharField(max_length=20, blank=True, null=True, verbose_name='Phone number', help_text="User's phone number")
-    location = models.CharField(max_length=100, blank=True, null=True, verbose_name='Location', help_text="User's location")
+    email = models.EmailField(unique=True, verbose_name='Email')
+    phone_number = models.CharField(max_length=20, blank=True, null=True, verbose_name='Phone number')
+    location = models.CharField(max_length=100, blank=True, null=True, verbose_name='Location')
     role = models.CharField(
         max_length=10,
         choices=ROLE_CHOICES,
         default='user',
         verbose_name='Role',
-        help_text='Role of the user in the system'
     )
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name='Avatar', help_text="User's avatar image")
-    is_verified = models.BooleanField(default=False, verbose_name='Verified', help_text="Email/phone is verified")
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name='Avatar')
+    is_verified = models.BooleanField(default=False, verbose_name='Verified')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

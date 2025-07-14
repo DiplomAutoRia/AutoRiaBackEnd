@@ -1,0 +1,45 @@
+# Загальні файли Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+
+# Віртуальні середовища
+venv/
+env/
+.venv/
+build/
+
+# Загальні Django файли
+*.log
+*.pot
+*.mo
+settings.py
+
+# База даних (SQLite)
+db.sqlite3
+
+# Медіа та статичні файли (згенеровані)
+/media/
+/static_collected/
+
+# Ідентифікатори IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# Системні файли
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Приховані секрети та змінні середовища
+.env
+
+# Django settings files
+AutoRiaBackEnd/settings.py
+
+# Специфічні для вашого скріншота
+package-lock.json # Якщо ви не використовуєте Node.js в корені, це може бути непотрібним, але краще ігнорувати, якщо воно з'являється.
