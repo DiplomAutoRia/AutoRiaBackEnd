@@ -16,6 +16,8 @@ import pymysql
 import os
 from dotenv import load_dotenv
 
+from datetime import timedelta
+
 load_dotenv()
 
 pymysql.install_as_MySQLdb()
@@ -48,6 +50,15 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
+
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    # 'allauth.socialaccount.providers.telegram',
+    # 'allauth.socialaccount.providers.diia',
+     
     'apps.users',
     'apps.vehicles',
     'apps.comments',
@@ -57,6 +68,8 @@ INSTALLED_APPS = [
     'sendgrid_backend',
 ]
 
+SITE_ID = 1
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -65,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'AutoRiaBackEnd.urls'
@@ -148,6 +162,59 @@ DEFAULT_FROM_EMAIL = 'no-reply@autodiplom.pp.ua'
 TWILIO_ACCOUNT_SID = 'SID'
 TWILIO_AUTH_TOKEN = 'TOKEN'
 TWILIO_PHONE_NUMBER = '+19383002909'
+
+AUTHENTICATION_BACKENDS = [
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True, 
+    'BLACKLIST_AFTER_ROTATION': True, 
+    
+    'UPDATE_LAST_LOGIN': True,
+    
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    
+    'USER_ID_FIELD': 'id', 
+    'USER_ID_CLAIM': 'user_id', 
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+}
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_ADAPTER = 'apps.users.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'apps.users.adapters.CustomSocialAccountAdapter'
+
+SOCIALACCOUNT_QUERY_EMAIL = True 
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': os.environ.get('CLIENT_ID'),
+            'secret': os.environ.get('CLIENT_SECRET'), 
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'offline',
+        }
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
