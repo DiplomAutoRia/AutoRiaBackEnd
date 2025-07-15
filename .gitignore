@@ -15,7 +15,7 @@ build/
 *.log
 *.pot
 *.mo
-local_settings.py
+settings.py
 
 # База даних (SQLite)
 db.sqlite3
@@ -37,6 +37,9 @@ Desktop.ini
 
 # Приховані секрети та змінні середовища
 .env
+
+# Django settings files
+AutoRiaBackEnd/settings.py
 
 # Специфічні для вашого скріншота
 package-lock.json # Якщо ви не використовуєте Node.js в корені, це може бути непотрібним, але краще ігнорувати, якщо воно з'являється.

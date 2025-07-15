@@ -108,9 +108,9 @@ WSGI_APPLICATION = 'AutoRiaBackEnd.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'diplom_autoria',
+        'NAME': 'diplomautoria',
         'USER': 'root',
-        'PASSWORD': '490IJT9y',
+        'PASSWORD': 'root',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -159,9 +159,9 @@ EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 DEFAULT_FROM_EMAIL = 'no-reply@autodiplom.pp.ua'
 
-TWILIO_ACCOUNT_SID = 'SID'
-TWILIO_AUTH_TOKEN = 'TOKEN'
-TWILIO_PHONE_NUMBER = '+19383002909'
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
 
 AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
