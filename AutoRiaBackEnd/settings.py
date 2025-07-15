@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from django.conf import settings
 import pymysql
 
 import os
@@ -49,6 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework.authtoken',
+    'corsheaders',
     'django_filters',
 
     'django.contrib.sites',
@@ -56,6 +59,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
     # 'allauth.socialaccount.providers.telegram',
     # 'allauth.socialaccount.providers.diia',
      
@@ -65,7 +70,7 @@ INSTALLED_APPS = [
     'apps.favorites',
     'apps.user_messages',
     'apps.reports',
-    'sendgrid_backend',
+    # 'sendgrid_backend',
 ]
 
 SITE_ID = 1
@@ -78,6 +83,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
 ]
 
@@ -108,9 +114,9 @@ WSGI_APPLICATION = 'AutoRiaBackEnd.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'diplomautoria',
+        'NAME': 'diplom_autoria',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': '490IJT9y',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -191,12 +197,12 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 }
 
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email', 'first_name', 'last_name', 'password1', 'password2']
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_ADAPTER = 'apps.users.adapters.CustomAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'apps.users.adapters.CustomSocialAccountAdapter'
+SOCIAL_LOGIN_CALLBACK_URL = "http://localhost:8000/social/google/login/callback/"
 
 SOCIALACCOUNT_QUERY_EMAIL = True 
 SOCIALACCOUNT_PROVIDERS = {
@@ -237,3 +243,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOWED_ALL_ORIGINS = True

@@ -22,9 +22,7 @@ from .utils import (
     delete_verification_code
 )
 
-from allauth.account.adapter import DefaultAccountAdapter
 from django.conf import settings
-from django.shortcuts import reverse
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 
