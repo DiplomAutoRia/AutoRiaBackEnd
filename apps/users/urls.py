@@ -9,7 +9,7 @@ from django.conf import settings
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
-    # callback_url = settings.SOCIAL_LOGIN_CALLBACK_URL
+    callback_url = settings.SOCIAL_LOGIN_CALLBACK_URL
 
 urlpatterns = [
     path('register/initial/', InitialRegistrationView.as_view(), name='register_initial'),

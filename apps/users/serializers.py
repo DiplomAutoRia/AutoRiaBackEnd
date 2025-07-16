@@ -133,6 +133,8 @@ class SetPasswordSerializer(serializers.Serializer):
         return data
     
 class LoginSerializer(TokenObtainPairSerializer):
+    username_field = 'contact_info'
+
     contact_info = serializers.CharField(
         required=True,
         write_only=True,
@@ -159,48 +161,53 @@ class LoginSerializer(TokenObtainPairSerializer):
         user = None
         cleaned_contact_info = re.sub(r'[()\s-]', '', contact_info)
 
+        is_email = False
+        is_phone = False
+
         try:
             validate_email(cleaned_contact_info)
-            user = User.objects.filter(email__iexact=cleaned_contact_info).first()
+            is_email = True
         except ValidationError:
             pass
 
-        if not user:
-            phone_regex = r"^(?:\+|0)[0-9]{7,15}$"
-            if re.fullmatch(phone_regex, cleaned_contact_info):
-                if not cleaned_contact_info.startswith('+'):
-                    if re.fullmatch(r'^0[0-9]{9}$', cleaned_contact_info):
-                        cleaned_contact_info = '+38' + cleaned_contact_info
-                user = User.objects.filter(phone_number=cleaned_contact_info).first()
+        phone_regex = r"^(?:\+|0)[0-9]{7,20}$"
+
+        if re.fullmatch(phone_regex, cleaned_contact_info):
+            is_phone = True
+            if not cleaned_contact_info.startswith('+'):
+                if re.fullmatch(r'^0[0-9]{9}$', cleaned_contact_info):
+                    cleaned_contact_info = '+38' + cleaned_contact_info[1:] 
+
+        if is_email:
+            user = User.objects.filter(email__iexact=cleaned_contact_info).first()
+        elif is_phone:
+            user = User.objects.filter(phone_number=cleaned_contact_info).first()
         
         if not user:
-            raise serializers.ValidationError("No user found with these credentials.")
+            raise serializers.ValidationError("Unable to log in with provided credentials.")
 
-        authenticated_user = authenticate(
-            request=self.context.get('request'),
-            username=user.email,  
-            password=password
-        )
+        if not user.check_password(password):
+            raise serializers.ValidationError("Unable to log in with provided credentials.")
 
-        if not authenticated_user:
-            raise serializers.ValidationError("Incorrect password.")
-
-        if not authenticated_user.is_active:
+        if not user.is_active:
             raise serializers.ValidationError("User account is inactive.")
 
-        refresh = RefreshToken.for_user(authenticated_user)
+        self.user = user
+        
+        refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
 
         data = {
             'refresh': str(refresh),
             'access': access_token,
-            'user_id': authenticated_user.id,
-            'email': authenticated_user.email,
-            'first_name': authenticated_user.first_name,
-            'last_name': authenticated_user.last_name,
+            'user_id': user.id,
+            'email': user.email if user.email else None,
+            'phone_number': user.phone_number if user.phone_number else None,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
         }
         return data
-
+    
 class PasswordResetRequestSerializer(serializers.Serializer):
     contact_info = serializers.CharField(
         required=True,
