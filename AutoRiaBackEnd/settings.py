@@ -11,10 +11,13 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from django.conf import settings
 import pymysql
 
 import os
 from dotenv import load_dotenv
+
+from datetime import timedelta
 
 load_dotenv()
 
@@ -47,15 +50,30 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework.authtoken',
+    'corsheaders',
     'django_filters',
+
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    # 'allauth.socialaccount.providers.telegram',
+    # 'allauth.socialaccount.providers.diia',
+     
     'apps.users',
     'apps.vehicles',
     'apps.comments',
     'apps.favorites',
     'apps.user_messages',
     'apps.reports',
-    'sendgrid_backend',
+    # 'sendgrid_backend',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -65,6 +83,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'AutoRiaBackEnd.urls'
@@ -94,9 +114,9 @@ WSGI_APPLICATION = 'AutoRiaBackEnd.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'diplomautoria',
+        'NAME': 'diplom_autoria',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': '490IJT9y',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -141,13 +161,70 @@ CACHES = {
     }
 }
 
-EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Або 'django.core.mail.backends.dummy.EmailBackend'
+else:
+    EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-DEFAULT_FROM_EMAIL = 'no-reply@autodiplom.pp.ua'
+DEFAULT_FROM_EMAIL = 'check@autodiplom.pp.ua'
+SENDGRID_SANDBOX_MODE = False
 
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+
+AUTHENTICATION_BACKENDS = [
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True, 
+    'BLACKLIST_AFTER_ROTATION': True, 
+    
+    'UPDATE_LAST_LOGIN': True,
+    
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    
+    'USER_ID_FIELD': 'id', 
+    'USER_ID_CLAIM': 'user_id', 
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+}
+
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email', 'first_name', 'last_name', 'password1', 'password2']
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_ADAPTER = 'apps.users.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'apps.users.adapters.CustomSocialAccountAdapter'
+SOCIAL_LOGIN_CALLBACK_URL = "http://localhost:8000/social/google/login/callback/"
+
+SOCIALACCOUNT_QUERY_EMAIL = True 
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': os.environ.get('CLIENT_ID'),
+            'secret': os.environ.get('CLIENT_SECRET'), 
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'offline',
+        }
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -170,3 +247,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOW_ALL_ORIGINS = True
