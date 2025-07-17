@@ -7,6 +7,7 @@ import re
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from dj_rest_auth.registration.serializers import SocialLoginSerializer
 
 User = get_user_model()
 
@@ -304,3 +305,13 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         if data['password'] != data['password_confirm']:
             raise serializers.ValidationError({"password_confirm": "Passwords do not match."})
         return data
+    
+class GoogleLoginSerializer(SocialLoginSerializer):
+    token = serializers.CharField(required=True)
+
+    def validate(self, attrs):
+        attrs['id_token'] = attrs.get('token')
+        attrs['access_token'] = None
+        attrs['code'] = None         
+
+        return super().validate(attrs)
