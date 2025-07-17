@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'apps.user_messages',
     'apps.reports',
     'sendgrid_backend',
+    'drf_yasg',
 ]
 
 SITE_ID = 2
