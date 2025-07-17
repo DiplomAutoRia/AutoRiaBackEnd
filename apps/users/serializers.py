@@ -1,3 +1,4 @@
+from linecache import cache
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from django.core.validators import validate_email
@@ -140,7 +141,7 @@ class LoginSerializer(TokenObtainPairSerializer):
         required=True,
         write_only=True,
         error_messages={
-            'required': 'The "phone or e-mail" field is required.'
+            'required': 'The \"phone or e-mail\" field is required.'
         }
     )
     password = serializers.CharField(
@@ -148,7 +149,7 @@ class LoginSerializer(TokenObtainPairSerializer):
         required=True,
         style={'input_type': 'password'},
         error_messages={
-            'required': 'The "password" field is required.'
+            'required': 'The \"password\" field is required.'
         }
     )
 
@@ -315,3 +316,99 @@ class GoogleLoginSerializer(SocialLoginSerializer):
         attrs['code'] = None         
 
         return super().validate(attrs)
+    
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=False, allow_null=True)
+    phone_number = serializers.CharField(required=False, allow_null=True, max_length=20)
+    first_name = serializers.CharField(
+        max_length=150,
+        required=True,
+        error_messages={
+            'required': 'First name is required.',
+            'max_length': 'First name cannot exceed 150 characters.'
+        }
+    )
+    last_name = serializers.CharField(
+        max_length=150,
+        required=True,
+        error_messages={
+            'required': 'Last name is required.',
+            'max_length': 'Last name cannot exceed 150 characters.'
+        }
+    )
+    location = serializers.CharField(required=False, allow_null=True, max_length=100)
+    avatar = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'phone_number', 'location', 'avatar', 'is_verified']
+        read_only_fields = ['role', 'is_verified'] 
+
+    def validate_email(self, value):
+        if value:
+            try:
+                validate_email(value)
+            except ValidationError:
+                raise serializers.ValidationError("Please enter a valid email address.")
+            if User.objects.filter(email__iexact=value).exclude(id=self.instance.id).exists():
+                raise serializers.ValidationError("This email is already used by another account.")
+        return value
+
+    def validate_phone_number(self, value):
+        if value:
+            cleaned_value = re.sub(r'[()\s-]', '', value)
+            phone_regex = r"^(?:\+|0)[0-9]{7,20}$"
+            if not re.fullmatch(phone_regex, cleaned_value):
+                raise serializers.ValidationError("Please enter a valid phone number.")
+            
+            if not cleaned_value.startswith('+'):
+                if re.fullmatch(r'^0[0-9]{9}$', cleaned_value):
+                    cleaned_value = '+38' + cleaned_value[1:]
+                else:
+                    raise serializers.ValidationError("Phone number must start with '+' or have the format 0XX XXX XX XX.")
+
+            if User.objects.filter(phone_number=cleaned_value).exclude(id=self.instance.id).exists():
+                raise serializers.ValidationError("This phone number is already used by another account.")
+        return cleaned_value
+
+    def update(self, instance, validated_data):
+        original_email = instance.email
+        original_phone_number = instance.phone_number
+
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.location = validated_data.get('location', instance.location)
+
+        new_email = validated_data.get('email')
+        if new_email and new_email != original_email:
+            cache.set(f'unverified_email_{instance.id}', new_email, timeout=300)
+            instance.email = None
+            instance.is_verified = False  
+        elif new_email == "":       
+            instance.email = None
+            instance.is_verified = False
+
+        new_phone_number = validated_data.get('phone_number')
+        if new_phone_number and new_phone_number != original_phone_number:
+            cache.set(f'unverified_phone_{instance.id}', new_phone_number, timeout=300)
+            instance.phone_number = None 
+            instance.is_verified = False
+        elif new_phone_number == "": 
+            instance.phone_number = None
+            instance.is_verified = False
+
+        avatar = validated_data.get('avatar')
+        if avatar is not None: 
+            instance.avatar = avatar
+        
+        instance.save()
+        return instance
+
+class ContactInfoVerificationSerializer(serializers.Serializer):
+    contact_info = serializers.CharField(required=True)
+    code = serializers.CharField(required=True, min_length=6, max_length=6)
+
+    def validate_code(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("Verification code must contain only digits.")
+        return value

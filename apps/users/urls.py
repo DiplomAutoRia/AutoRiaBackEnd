@@ -1,5 +1,16 @@
 from django.urls import path, include
-from .views import InitialRegistrationView, VerifyCodeView, RegisterUserView, CustomTokenObtainPairView, PasswordResetRequestView, PasswordResetConfirmView, GoogleLogin
+from .views import (
+    InitialRegistrationView,
+    VerifyCodeView,
+    RegisterUserView,
+    CustomTokenObtainPairView,
+    PasswordResetRequestView,
+    PasswordResetConfirmView,
+    GoogleLogin,
+    UserProfileView,
+    UserDeleteView,
+    ContactInfoVerificationUpdateView
+)
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 urlpatterns = [
@@ -15,4 +26,10 @@ urlpatterns = [
     path('password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 
     path('social/google/login/', GoogleLogin.as_view(), name='google_login'),
+    
+    # GET-запит на '/profile/' - отримати всю інформацію про користувача
+    # PUT-запит на '/profile/' - відредагувати інформацію про користувача
+    path('profile/', UserProfileView.as_view(), name='user_profile'),
+    path('profile/verify-contact/', ContactInfoVerificationUpdateView.as_view(), name='verify_contact_update'),
+    path('profile/delete/', UserDeleteView.as_view(), name='user_delete'),
 ]

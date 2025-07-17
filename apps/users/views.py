@@ -12,12 +12,15 @@ from .serializers import (
     LoginSerializer,
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
-    GoogleLoginSerializer
+    GoogleLoginSerializer,
+    UserProfileUpdateSerializer,
+    ContactInfoVerificationSerializer
 )
 
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from rest_framework.permissions import IsAuthenticated
 
 from .utils import (
     generate_verification_code,
@@ -232,3 +235,89 @@ class GoogleLogin(SocialLoginView):
     client_class = OAuth2Client
     callback_url = settings.SOCIAL_LOGIN_CALLBACK_URL
     serializer_class = GoogleLoginSerializer
+    
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserProfileUpdateSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        serializer = UserProfileUpdateSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            updated_user = serializer.save()
+
+            response_data = {"detail": "User profile updated successfully."}
+
+            if updated_user.email is None and cache.get(f'unverified_email_{request.user.id}'):
+                code = generate_verification_code()
+                unverified_email = cache.get(f'unverified_email_{request.user.id}')
+                store_verification_code(unverified_email, code)
+                send_verification_email(unverified_email, code)
+                response_data["detail"] += " Verification code sent to your new email. Please verify it."
+                response_data["email_verification_required"] = True
+            
+            if updated_user.phone_number is None and cache.get(f'unverified_phone_{request.user.id}'):
+                code = generate_verification_code()
+                unverified_phone = cache.get(f'unverified_phone_{request.user.id}')
+                store_verification_code(unverified_phone, code)
+                send_verification_sms(unverified_phone, code)
+                response_data["detail"] += " Verification code sent to your new phone number. Please verify it."
+                response_data["phone_verification_required"] = True
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContactInfoVerificationUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ContactInfoVerificationSerializer(data=request.data)
+        if serializer.is_valid():
+            contact_info = serializer.validated_data['contact_info']
+            code_entered = serializer.validated_data['code']
+
+            stored_code = get_verification_code(contact_info)
+
+            if not stored_code or stored_code != code_entered:
+                return Response(
+                    {"detail": "Invalid or expired verification code."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            user = request.user
+            detail_message = ""
+
+            unverified_email = cache.get(f'unverified_email_{user.id}')
+            unverified_phone = cache.get(f'unverified_phone_{user.id}')
+
+            if unverified_email == contact_info:
+                user.email = unverified_email
+                user.is_verified = True
+                cache.delete(f'unverified_email_{user.id}')
+                delete_verification_code(contact_info)
+                detail_message = "Email successfully verified and updated."
+            elif unverified_phone == contact_info:
+                user.phone_number = unverified_phone
+                user.is_verified = True
+                cache.delete(f'unverified_phone_{user.id}')
+                delete_verification_code(contact_info)
+                detail_message = "Phone number successfully verified and updated."
+            else:
+                return Response(
+                    {"detail": "Provided contact information does not match any pending verification requests for this user."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            user.save()
+            return Response({"detail": detail_message}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        request.user.delete()
+        return Response({"detail": "User account deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
