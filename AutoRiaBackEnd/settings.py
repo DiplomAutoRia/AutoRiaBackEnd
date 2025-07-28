@@ -115,7 +115,7 @@ WSGI_APPLICATION = 'AutoRiaBackEnd.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'diplom_autoria',
+        'NAME': 'diplom-autoria',
         'USER': 'root',
         'PASSWORD': '490IJT9y',
         'HOST': 'localhost',
@@ -133,7 +133,22 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
-    ]
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Enter "Bearer [JWT_TOKEN]"',
+        }
+    },
+    'USE_SESSION_AUTH': False, # Важливо: відключити сесійну автентифікацію для Swagger, якщо використовуєш JWT
+    'JSON_EDITOR': True, # Дозволяє зручний редактор JSON для тіла запитів
+    'SHOW_REQUEST_HEADERS': True, # Показувати заголовки запитів
 }
 
 # Password validation
