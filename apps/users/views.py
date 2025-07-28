@@ -35,9 +35,22 @@ from django.conf import settings
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 User = get_user_model()
 
 class InitialRegistrationView(APIView):
+    @swagger_auto_schema(
+        request_body=InitialRegistrationSerializer,
+        responses={200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+        ), 400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+        )}
+    )
     def post(self, request):
         serializer = InitialRegistrationSerializer(data=request.data)
         if serializer.is_valid():
@@ -66,6 +79,16 @@ class InitialRegistrationView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyCodeView(APIView):
+    @swagger_auto_schema(
+        request_body=VerificationSerializer,
+        responses={200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+        ), 400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.TYPE_STRING}
+        )}
+    )
     def post(self, request):
         serializer = VerificationSerializer(data=request.data)
         if serializer.is_valid():
@@ -90,6 +113,19 @@ class VerifyCodeView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RegisterUserView(APIView):
+    @swagger_auto_schema(
+        request_body=SetPasswordSerializer,
+        responses={201: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+        ), 400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+        ), 500: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+        )}
+    )
     def post(self, request):
         serializer = SetPasswordSerializer(data=request.data)
         if serializer.is_valid():
@@ -152,6 +188,16 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = LoginSerializer
 
 class PasswordResetRequestView(APIView):
+    @swagger_auto_schema(
+        request_body=PasswordResetRequestSerializer,
+        responses={200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+        ), 400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.TYPE_STRING}
+        )}
+    )
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         if serializer.is_valid():
@@ -186,6 +232,19 @@ class PasswordResetRequestView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PasswordResetConfirmView(APIView):
+    @swagger_auto_schema(
+        request_body=PasswordResetConfirmSerializer,
+        responses={200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+        ), 400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+        ), 404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+        )}
+    )
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():

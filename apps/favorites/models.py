@@ -7,13 +7,17 @@ class Favorite(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='favorites',
-        verbose_name='User'
+        verbose_name='User',
+        null=True,
+        blank=True,
     )
     vehicle = models.ForeignKey(
         Vehicle,
         on_delete=models.CASCADE,
         related_name='favorited_by',
-        verbose_name='Vehicle'
+        verbose_name='Vehicle',
+        null=True, 
+        blank=True,
     )
     added_at = models.DateTimeField(auto_now_add=True, verbose_name='Added at')
 
