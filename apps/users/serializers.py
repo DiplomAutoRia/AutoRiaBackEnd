@@ -1,4 +1,4 @@
-from linecache import cache
+from django.core.cache import cache
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from django.core.validators import validate_email

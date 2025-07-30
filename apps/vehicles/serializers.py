@@ -8,8 +8,8 @@ from .models import (
 class VehicleImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = VehicleImage
-        fields = ('id', 'image', 'uploaded_at')
-        read_only_fields = ('id', 'uploaded_at')
+        fields = ['id', 'image', 'vehicle']
+        read_only_fields = ['vehicle']
 
 class CarSerializer(serializers.ModelSerializer):
     class Meta:

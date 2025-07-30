@@ -146,9 +146,9 @@ SWAGGER_SETTINGS = {
             'description': 'Enter "Bearer [JWT_TOKEN]"',
         }
     },
-    'USE_SESSION_AUTH': False, # Важливо: відключити сесійну автентифікацію для Swagger, якщо використовуєш JWT
-    'JSON_EDITOR': True, # Дозволяє зручний редактор JSON для тіла запитів
-    'SHOW_REQUEST_HEADERS': True, # Показувати заголовки запитів
+    'USE_SESSION_AUTH': False,
+    'JSON_EDITOR': True,
+    'SHOW_REQUEST_HEADERS': True,
 }
 
 # Password validation

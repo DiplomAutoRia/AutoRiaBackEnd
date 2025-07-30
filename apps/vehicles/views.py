@@ -158,7 +158,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
-
+    
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -167,7 +167,8 @@ class VehicleViewSet(viewsets.ModelViewSet):
                 'image': openapi.Schema(type=openapi.TYPE_STRING, format=openapi.FORMAT_BINARY, description='Image file to upload'),
             }
         ),
-        responses={201: VehicleImageSerializer}
+        responses={201: VehicleImageSerializer},
+        consumes=['multipart/form-data']
     )
     @action(detail=True, methods=['post'], url_path='add-image', permission_classes=[IsOwnerOrReadOnly])
     def add_image(self, request, pk=None):
