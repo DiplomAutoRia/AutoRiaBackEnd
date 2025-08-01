@@ -18,6 +18,8 @@ from .serializers import (
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+from django.db.models import Q
+
 class IsOwnerOrReadOnly(IsAuthenticated):
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
@@ -153,14 +155,14 @@ class VehicleViewSet(viewsets.ModelViewSet):
             'page',
             in_=openapi.IN_QUERY,
             type=openapi.TYPE_INTEGER,
-            description='Номер сторінки',
+            description='Page number',
             default=1
         ),
         openapi.Parameter(
             'limit',
             in_=openapi.IN_QUERY,
             type=openapi.TYPE_INTEGER,
-            description='Кількість оголошень на сторінці',
+            description='Number of listings per page',
             default=10
         ),
     ]
@@ -240,3 +242,72 @@ class VehicleViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except VehicleImage.DoesNotExist:
             return Response({"detail": "Image not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'q',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description='Search text. Example: "BMW X5 2020 black"',
+                required=True
+            ),
+            openapi.Parameter(
+                'page',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description='Page number',
+                default=1
+            ),
+            openapi.Parameter(
+                'limit',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_INTEGER,
+                description='Number of listings per page',
+                default=10
+            ),
+        ],
+        responses={200: VehicleSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'], url_path='search', permission_classes=[AllowAny])
+    def search(self, request):
+        query_string = request.query_params.get('q', '').strip()
+
+        if not query_string:
+            return Response(
+                {"detail": "The 'q' parameter for search is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        search_terms = query_string.split()
+        
+        overall_q_object = Q()
+
+        for term in search_terms:
+            term_q = Q()
+            term_q |= Q(brand__icontains=term)
+            term_q |= Q(model__icontains=term)
+            term_q |= Q(description__icontains=term)
+            term_q |= Q(location__icontains=term)
+            term_q |= Q(color__icontains=term)
+            
+            if term.isdigit():
+                term_q |= Q(year=int(term))
+                try:
+                    term_q |= Q(price=float(term))
+                except ValueError:
+                    pass 
+                term_q |= Q(mileage=int(term))
+                term_q |= Q(engine_power=int(term))
+
+            overall_q_object &= term_q
+
+        queryset = self.get_queryset().filter(overall_q_object).distinct()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
