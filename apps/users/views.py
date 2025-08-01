@@ -20,7 +20,7 @@ from .serializers import (
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from .utils import (
     generate_verification_code,
@@ -41,6 +41,7 @@ from drf_yasg import openapi
 User = get_user_model()
 
 class InitialRegistrationView(APIView):
+    permission_classes = [AllowAny]
     @swagger_auto_schema(
         request_body=InitialRegistrationSerializer,
         responses={200: openapi.Schema(
@@ -79,6 +80,7 @@ class InitialRegistrationView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyCodeView(APIView):
+    permission_classes = [AllowAny]
     @swagger_auto_schema(
         request_body=VerificationSerializer,
         responses={200: openapi.Schema(
@@ -86,7 +88,7 @@ class VerifyCodeView(APIView):
             properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
         ), 400: openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            properties={'detail': openapi.TYPE_STRING}
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
         )}
     )
     def post(self, request):
@@ -113,6 +115,7 @@ class VerifyCodeView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RegisterUserView(APIView):
+    permission_classes = [AllowAny]
     @swagger_auto_schema(
         request_body=SetPasswordSerializer,
         responses={201: openapi.Schema(
@@ -185,9 +188,11 @@ class RegisterUserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class CustomTokenObtainPairView(TokenObtainPairView):
+    permission_classes = [AllowAny]
     serializer_class = LoginSerializer
 
 class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
     @swagger_auto_schema(
         request_body=PasswordResetRequestSerializer,
         responses={200: openapi.Schema(
@@ -195,7 +200,7 @@ class PasswordResetRequestView(APIView):
             properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
         ), 400: openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            properties={'detail': openapi.TYPE_STRING}
+            properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
         )}
     )
     def post(self, request):
@@ -232,6 +237,7 @@ class PasswordResetRequestView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
     @swagger_auto_schema(
         request_body=PasswordResetConfirmSerializer,
         responses={200: openapi.Schema(
@@ -290,6 +296,7 @@ class PasswordResetConfirmView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class GoogleLogin(SocialLoginView):
+    permission_classes = [AllowAny]
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
     callback_url = settings.SOCIAL_LOGIN_CALLBACK_URL
@@ -298,10 +305,33 @@ class GoogleLogin(SocialLoginView):
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Get the profile of the current authenticated user.",
+        responses={
+            200: UserProfileUpdateSerializer,
+            401: "Unauthorized: User is not authenticated."
+        }
+    )
     def get(self, request):
         serializer = UserProfileUpdateSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_description="Update the profile of the current authenticated user.",
+        request_body=UserProfileUpdateSerializer,
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'detail': openapi.Schema(type=openapi.TYPE_STRING),
+                    'email_verification_required': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="True if verification of the new email is required"),
+                    'phone_verification_required': openapi.Schema(type=openapi.TYPE_BOOLEAN, description="True if verification of the new phone is required")
+                }
+            ),
+            400: "Bad Request: Invalid data or validation errors.",
+            401: "Unauthorized: User is not authenticated."
+        }
+    )
     def put(self, request):
         serializer = UserProfileUpdateSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
@@ -309,7 +339,7 @@ class UserProfileView(APIView):
 
             response_data = {"detail": "User profile updated successfully."}
 
-            if updated_user.email is None and cache.get(f'unverified_email_{request.user.id}'):
+            if cache.get(f'unverified_email_{request.user.id}'):
                 code = generate_verification_code()
                 unverified_email = cache.get(f'unverified_email_{request.user.id}')
                 store_verification_code(unverified_email, code)
@@ -317,7 +347,7 @@ class UserProfileView(APIView):
                 response_data["detail"] += " Verification code sent to your new email. Please verify it."
                 response_data["email_verification_required"] = True
             
-            if updated_user.phone_number is None and cache.get(f'unverified_phone_{request.user.id}'):
+            if cache.get(f'unverified_phone_{request.user.id}'):
                 code = generate_verification_code()
                 unverified_phone = cache.get(f'unverified_phone_{request.user.id}')
                 store_verification_code(unverified_phone, code)
@@ -332,6 +362,18 @@ class UserProfileView(APIView):
 class ContactInfoVerificationUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Verify updated contact information (email/phone) using a code.",
+        request_body=ContactInfoVerificationSerializer,
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={'detail': openapi.Schema(type=openapi.TYPE_STRING)}
+            ),
+            400: "Bad Request: Invalid verification code or contact information mismatch.",
+            401: "Unauthorized: User is not authenticated."
+        }
+    )
     def post(self, request):
         serializer = ContactInfoVerificationSerializer(data=request.data)
         if serializer.is_valid():
@@ -377,6 +419,13 @@ class ContactInfoVerificationUpdateView(APIView):
 class UserDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Delete the account of the current authenticated user.",
+        responses={
+            204: "No Content: Account deleted successfully.",
+            401: "Unauthorized: User is not authenticated."
+        }
+    )
     def delete(self, request):
         request.user.delete()
         return Response({"detail": "User account deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
