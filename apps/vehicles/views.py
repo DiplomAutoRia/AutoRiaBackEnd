@@ -12,13 +12,17 @@ from .serializers import (
     VehicleSerializer, VehicleImageSerializer,
     CarSerializer, MotorcycleSerializer, TruckSerializer,
     TrailerSerializer, SpecialTechSerializer, BusSerializer, WaterTransportSerializer,
-    AirTransportSerializer, MotorhomeSerializer
+    AirTransportSerializer, MotorhomeSerializer,
+    VehicleDetailSerializer
 )
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from django.db.models import Q
+
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import VehicleFilter
 
 class IsOwnerOrReadOnly(IsAuthenticated):
     def has_object_permission(self, request, view, obj):
@@ -125,14 +129,19 @@ class VehicleViewSet(viewsets.ModelViewSet):
 
     VEHICLE_TYPES = VEHICLE_TYPES_CHOICES
 
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = VehicleFilter
+
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'filter_vehicles', 'search']:
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsOwnerOrReadOnly]
         return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
+        if self.action in ['list', 'retrieve', 'my_vehicles', 'search']:
+            return VehicleDetailSerializer
         return VehicleSerializer
 
     def get_object(self):
@@ -164,6 +173,132 @@ class VehicleViewSet(viewsets.ModelViewSet):
             type=openapi.TYPE_INTEGER,
             description='Number of listings per page',
             default=10
+        ),
+        openapi.Parameter(
+        'vehicle_type',
+        openapi.IN_QUERY,
+        description="Тип транспортного засобу (наприклад, car, motorcycle)",
+        type=openapi.TYPE_STRING,
+        enum=['car', 'motorcycle', 'truck', 'trailer', 'specialtech', 'bus', 'watertransport', 'airtransport', 'motorhome']
+     ),
+        openapi.Parameter(
+            'year_min',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_INTEGER,
+            description='Мінімальний рік виробництва'
+        ),
+        openapi.Parameter(
+            'year_max',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_INTEGER,
+            description='Максимальний рік виробництва'
+        ),
+        openapi.Parameter(
+            'brand',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_STRING,
+            description='Бренд автомобіля (напр. "BMW")'
+        ),
+        openapi.Parameter(
+            'model',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_ARRAY,
+            collection_format='csv',
+            items=openapi.Items(type=openapi.TYPE_STRING),
+            description='Моделі, розділені комою (напр. "X5,A6")'
+        ),
+        openapi.Parameter(
+            'fuel_type',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_ARRAY,
+            collection_format='csv',
+            items=openapi.Items(
+                type=openapi.TYPE_STRING,
+                enum=[choice[0] for choice in Vehicle._meta.get_field('fuel_type').choices]
+            ),
+            description='Типи палива, розділені комою'
+        ),
+        openapi.Parameter(
+            'transmission',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_ARRAY,
+            collection_format='csv',
+            items=openapi.Items(
+                type=openapi.TYPE_STRING,
+                enum=[choice[0] for choice in Vehicle._meta.get_field('transmission').choices]
+            ),
+            description='Типи трансмісії, розділені комою'
+        ),
+        openapi.Parameter(
+            'color',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_ARRAY,
+            collection_format='csv',
+            items=openapi.Items(
+                type=openapi.TYPE_STRING,
+                enum=[choice[0] for choice in Vehicle._meta.get_field('color').choices]
+            ),
+            description='Кольори, розділені комою'
+        ),
+        openapi.Parameter(
+            'body_type',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_ARRAY,
+            collection_format='csv',
+            items=openapi.Items(type=openapi.TYPE_STRING),
+            description='Car: Типи кузова, розділені комою (напр. "Sedan,SUV")'
+        ),
+        openapi.Parameter(
+            'bike_type',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_ARRAY,
+            collection_format='csv',
+            items=openapi.Items(type=openapi.TYPE_STRING),
+            description='Motorcycle: Типи мотоциклів, розділені комою (напр. "Sportbike,Cruiser")'
+        ),
+        openapi.Parameter(
+            'trailer_type',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_ARRAY,
+            collection_format='csv',
+            items=openapi.Items(type=openapi.TYPE_STRING),
+            description='Trailer: Типи причепів, розділені комою (напр. "Flatbed,Box")'
+        ),
+        openapi.Parameter(
+            'specialization',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_ARRAY,
+            collection_format='csv',
+            items=openapi.Items(type=openapi.TYPE_STRING),
+            description='SpecialTech: Спеціалізації, розділені комою (напр. "Excavator,Loader")'
+        ),
+        openapi.Parameter(
+            'seats_min',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_INTEGER,
+            description='Bus: Мінімальна кількість місць'
+        ),
+        openapi.Parameter(
+            'boat_type',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_ARRAY,
+            collection_format='csv',
+            items=openapi.Items(type=openapi.TYPE_STRING),
+            description='WaterTransport: Типи, розділені комою (напр. "Yacht,Motorboat")'
+        ),
+        openapi.Parameter(
+            'aircraft_type',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_ARRAY,
+            collection_format='csv',
+            items=openapi.Items(type=openapi.TYPE_STRING),
+            description='AirTransport: Типи, розділені комою (напр. "Helicopter,Airplane")'
+        ),
+        openapi.Parameter(
+            'has_kitchen',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_BOOLEAN,
+            description='Motorhome: Наявність кухні'
         ),
     ]
 
@@ -200,7 +335,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
     )
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
-    
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -242,7 +377,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except VehicleImage.DoesNotExist:
             return Response({"detail": "Image not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(

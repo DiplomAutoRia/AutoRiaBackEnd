@@ -1,7 +1,7 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from allauth.socialaccount.adapter import DefaultSocialAccountAdapter # ДОДАЙТЕ ЦЕЙ ІМПОРТ
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 
 class CustomAccountAdapter(DefaultAccountAdapter):
     def save_user(self, request, user, form, commit=True):

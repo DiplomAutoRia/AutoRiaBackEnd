@@ -365,3 +365,40 @@ class VehicleSerializer(serializers.ModelSerializer):
             VehicleImage.objects.create(vehicle=instance, image=image_file)
 
         return instance
+    
+class VehicleDetailSerializer(serializers.ModelSerializer):
+    car = CarSerializer(read_only=True)
+    motorcycle = MotorcycleSerializer(read_only=True)
+    truck = TruckSerializer(read_only=True)
+    trailer = TrailerSerializer(read_only=True)
+    specialtech = SpecialTechSerializer(read_only=True)
+    bus = BusSerializer(read_only=True)
+    watertransport = WaterTransportSerializer(read_only=True)
+    airtransport = AirTransportSerializer(read_only=True)
+    motorhome = MotorhomeSerializer(read_only=True)
+
+    images = VehicleImageSerializer(many=True, read_only=True)
+
+    is_favorited = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Vehicle
+        fields = [
+            'id', 'user', 'brand', 'model', 'year', 'price', 'currency', 'description', 
+            'location', 'mileage', 'color', 'engine_volume', 'engine_power', 'fuel_type', 
+            'transmission', 'registration_country', 'is_custom_cleared', 'vin_code', 
+            'number_of_owners', 'is_active', 'views_count', 'created_at', 'updated_at', 
+            'images',
+            'car', 'motorcycle', 'truck', 'trailer', 'specialtech',
+            'bus', 'watertransport', 'airtransport', 'motorhome',
+            'is_favorited'
+        ]
+        read_only_fields = [
+            'id', 'user', 'is_active', 'views_count', 'created_at', 'updated_at'
+        ]
+
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.favorited_by.filter(user=request.user).exists()
+        return False
