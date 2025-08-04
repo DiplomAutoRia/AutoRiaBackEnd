@@ -12,7 +12,8 @@ from .serializers import (
     VehicleSerializer, VehicleImageSerializer,
     CarSerializer, MotorcycleSerializer, TruckSerializer,
     TrailerSerializer, SpecialTechSerializer, BusSerializer, WaterTransportSerializer,
-    AirTransportSerializer, MotorhomeSerializer
+    AirTransportSerializer, MotorhomeSerializer,
+    VehicleDetailSerializer
 )
 
 from drf_yasg.utils import swagger_auto_schema
@@ -139,6 +140,8 @@ class VehicleViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def get_serializer_class(self):
+        if self.action in ['list', 'retrieve', 'my_vehicles', 'search']:
+            return VehicleDetailSerializer
         return VehicleSerializer
 
     def get_object(self):
