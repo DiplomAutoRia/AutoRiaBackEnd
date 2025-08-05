@@ -1,10 +1,15 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import VehicleViewSet
+from rest_framework_nested import routers
 
-router = DefaultRouter()
-router.register(r'', VehicleViewSet, basename='vehicle')
+from .views import VehicleViewSet
+from apps.comments.views import CommentViewSet
+
+router = routers.DefaultRouter()
+router.register(r'vehicles', VehicleViewSet, basename='vehicle')
+
+comments_router = routers.NestedDefaultRouter(router, r'vehicles', lookup='vehicle')
+comments_router.register(r'comments', CommentViewSet, basename='vehicle-comments')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    *router.urls,
+    *comments_router.urls,
 ]
