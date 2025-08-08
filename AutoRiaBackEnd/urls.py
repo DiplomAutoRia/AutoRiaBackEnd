@@ -42,7 +42,7 @@ urlpatterns = [
     path('api/favorites/', include('apps.favorites.urls')),
     path('api/user_messages/', include('apps.user_messages.urls')),
     # path('api/comments/', include('apps.comments.urls')),
-    path('api/reports/', include('apps.reports.urls')),
+    # path('api/reports/', include('apps.reports.urls')),
     
     path('accounts/', include('allauth.urls')),
     

@@ -5,6 +5,7 @@ from .models import (
     SpecialTech, Bus, WaterTransport, AirTransport, Motorhome
 )
 from apps.comments.serializers import CommentSerializer
+from apps.reports.serializers import ReportSerializer
 
 class VehicleImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -381,6 +382,8 @@ class VehicleDetailSerializer(serializers.ModelSerializer):
     images = VehicleImageSerializer(many=True, read_only=True)
     
     comments = CommentSerializer(many=True, read_only=True)
+    
+    reports = ReportSerializer(many=True, read_only=True)
 
     is_favorited = serializers.SerializerMethodField()
 
@@ -394,7 +397,7 @@ class VehicleDetailSerializer(serializers.ModelSerializer):
             'images',
             'car', 'motorcycle', 'truck', 'trailer', 'specialtech',
             'bus', 'watertransport', 'airtransport', 'motorhome',
-            'is_favorited', 'comments',
+            'is_favorited', 'comments', 'reports',
         ]
         read_only_fields = [
             'id', 'user', 'is_active', 'views_count', 'created_at', 'updated_at'
