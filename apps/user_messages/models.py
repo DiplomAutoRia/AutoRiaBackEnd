@@ -3,6 +3,14 @@ from django.conf import settings
 from apps.vehicles.models import Vehicle
 
 class UserMessages(models.Model):
+    conversation = models.ForeignKey(
+        'self', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='replies',
+        verbose_name='Conversation'
+    )
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -33,4 +41,4 @@ class UserMessages(models.Model):
         verbose_name_plural = 'Messages'
 
     def __str__(self):
-        return f"From {self.sender} to {self.receiver} ({self.timestamp})"
+        return f"From {self.sender} to {self.receiver} about {self.vehicle.title}"
