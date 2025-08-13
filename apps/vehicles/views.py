@@ -122,7 +122,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
     queryset = Vehicle.objects.all().select_related(
         'car', 'motorcycle', 'truck', 'trailer', 'specialtech',
         'bus', 'watertransport', 'airtransport', 'motorhome'
-    ).order_by('-created_at')
+    ).prefetch_related('comments').order_by('-created_at')
 
     permission_classes = [IsOwnerOrReadOnly]
     pagination_class = CustomVehiclePagination
