@@ -40,4 +40,4 @@ class ConversationSerializer(serializers.ModelSerializer):
 class MessageCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserMessages
-        fields = ['receiver', 'vehicle', 'text']
+        fields = ['receiver', 'vehicle', 'conversation', 'text']
