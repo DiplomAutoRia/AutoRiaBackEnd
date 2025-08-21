@@ -20,29 +20,42 @@ class MessageViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
 
         receiver = serializer.validated_data['receiver']
-        vehicle = serializer.validated_data['vehicle']
+        vehicle = serializer.validated_data.get('vehicle')
+        conversation = serializer.validated_data.get('conversation')
         text = serializer.validated_data['text']
 
-        existing_conversation = UserMessages.objects.filter(
-            Q(sender=request.user, receiver=receiver, vehicle=vehicle, conversation__isnull=True) |
-            Q(sender=receiver, receiver=request.user, vehicle=vehicle, conversation__isnull=True)
-        ).first()
-
-        if existing_conversation:
+        if conversation:
             message = UserMessages.objects.create(
                 sender=request.user,
                 receiver=receiver,
-                vehicle=vehicle,
+                vehicle=conversation.vehicle,
                 text=text,
-                conversation=existing_conversation
+                conversation=conversation
             )
+        elif vehicle:
+            existing_conversation = UserMessages.objects.filter(
+                Q(sender=request.user, receiver=receiver, vehicle=vehicle, conversation__isnull=True) |
+                Q(sender=receiver, receiver=request.user, vehicle=vehicle, conversation__isnull=True)
+            ).first()
+
+            if existing_conversation:
+                message = UserMessages.objects.create(
+                    sender=request.user,
+                    receiver=receiver,
+                    vehicle=vehicle,
+                    text=text,
+                    conversation=existing_conversation
+                )
+            else:
+                message = UserMessages.objects.create(
+                    sender=request.user,
+                    receiver=receiver,
+                    vehicle=vehicle,
+                    text=text
+                )
         else:
-            message = UserMessages.objects.create(
-                sender=request.user,
-                receiver=receiver,
-                vehicle=vehicle,
-                text=text
-            )
+            return Response({"detail": "Either vehicle or conversation must be specified."}, 
+                          status=status.HTTP_400_BAD_REQUEST)
 
         self.send_notifications(message, request.user)
 

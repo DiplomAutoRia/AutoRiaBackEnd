@@ -224,7 +224,7 @@ class PasswordResetRequestView(APIView):
             store_verification_code(contact_value, code)
 
             if contact_type == 'email':
-                send_verification_email(contact_value, code)
+                send_verification_email(contact_value, code, 'password_reset')
             else:
                 send_verification_sms(contact_value, code)
 

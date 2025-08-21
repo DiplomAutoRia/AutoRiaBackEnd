@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Код підтвердження - AutoRia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f8f9fa;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .header-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .welcome-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .verification-section {
+            background-color: #f7fafc;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .verification-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .verification-code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            background-color: #ffffff;
+            padding: 15px 30px;
+            border-radius: 8px;
+            letter-spacing: 4px;
+            margin: 20px 0;
+            border: 2px dashed #667eea;
+            display: inline-block;
+        }
+        
+        .verification-note {
+            color: #718096;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        
+        .instructions {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #edf2f7;
+            border-radius: 8px;
+        }
+        
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #4a5568;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .security-notice {
+            background-color: #fed7d7;
+            border-left: 4px solid #e53e3e;
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        
+        .security-notice h4 {
+            color: #c53030;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .security-notice p {
+            color: #742a2a;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .footer {
+            background-color: #2d3748;
+            color: #cbd5e0;
+            padding: 25px 30px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .footer-links {
+            margin: 15px 0;
+        }
+        
+        .footer-links a {
+            color: #81e6d9;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .social-links {
+            margin-top: 20px;
+        }
+        
+        .social-link {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 8px;
+            background-color: #4a5568;
+            border-radius: 50%;
+            color: #cbd5e0;
+            text-decoration: none;
+            font-size: 16px;
+            width: 35px;
+            height: 35px;
+            text-align: center;
+            line-height: 19px;
+        }
+        
+        .social-link:hover {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .verification-code {
+                font-size: 24px;
+                padding: 12px 20px;
+            }
+            
+            .header {
+                padding: 25px 20px;
+            }
+            
+            .logo {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo">🚗 AutoRia</div>
+            <div class="header-subtitle">Ваш надійний помічник у світі автомобілів</div>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-text">
+                Вітаємо! Ви зареєструвались на AutoRia
+            </div>
+            
+            <p>Дякуємо, що обрали наш сервіс для пошуку автомобілів. Для завершення реєстрації введіть код підтвердження нижче:</p>
+            
+            <div class="verification-section">
+                <div class="verification-title">Ваш код підтвердження:</div>
+                <div class="verification-code">{{ verification_code }}</div>
+                <div class="verification-note">
+                    ⏰ Код дійсний протягом <strong>5 хвилин</strong>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3>📋 Як використати код:</h3>
+                <ol>
+                    <li>Поверніться до форми реєстрації на сайті AutoRia</li>
+                    <li>Введіть отриманий код у відповідне поле</li>
+                    <li>Створіть пароль для вашого акаунту</li>
+                    <li>Завершіть реєстрацію натисканням кнопки</li>
+                </ol>
+            </div>
+            
+            <div class="security-notice">
+                <h4>🔐 Важливо для безпеки:</h4>
+                <p>
+                    Нікому не повідомляйте цей код. Співробітники AutoRia ніколи не будуть запитувати у вас код підтвердження по телефону чи email. 
+                    Якщо ви не створювали акаунт на AutoRia, просто проігноруйте це повідомлення.
+                </p>
+            </div>
+            
+            <p style="margin-top: 30px; color: #718096;">
+                Якщо у вас виникли питання, наша команда підтримки завжди готова допомогти. 
+                Зв'яжіться з нами через <a href="mailto:support@autoria.com" style="color: #667eea;">support@autoria.com</a>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <div>
+                <strong>AutoRia</strong> - найкращий майданчик для купівлі та продажу автомобілів в Україні
+            </div>
+            
+            <div class="footer-links">
+                <a href="#">Про нас</a>
+                <a href="#">Підтримка</a>
+                <a href="#">Умови використання</a>
+                <a href="#">Політика конфіденційності</a>
+            </div>
+            
+            <div class="social-links">
+                <a href="#" class="social-link">📘</a>
+                <a href="#" class="social-link">📷</a>
+                <a href="#" class="social-link">🐦</a>
+                <a href="#" class="social-link">📞</a>
+            </div>
+            
+            <div style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
+                © 2025 AutoRia. Всі права захищені.<br>
+                м. Київ, Україна
+            </div>
+        </div>
+    </div>
+</body>
+</html>
