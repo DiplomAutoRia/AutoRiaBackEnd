@@ -57,7 +57,8 @@ class MessageViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             return Response({"detail": "Either vehicle or conversation must be specified."}, 
                           status=status.HTTP_400_BAD_REQUEST)
 
-        self.send_notifications(message, request.user)
+        # Removed email notifications to avoid spam
+        # self.send_notifications(message, request.user)
 
         headers = self.get_success_headers(serializer.data)
         return Response(MessageSerializer(message).data, status=status.HTTP_201_CREATED, headers=headers)
