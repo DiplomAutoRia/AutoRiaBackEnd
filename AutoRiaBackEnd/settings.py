@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
+    'channels',
 
     'django.contrib.sites',
     'allauth',
@@ -270,3 +271,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 FRONTEND_URL = 'http://localhost:5173'
+
+# Channels and WebSocket configuration
+ASGI_APPLICATION = 'AutoRiaBackEnd.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
