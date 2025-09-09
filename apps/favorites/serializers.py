@@ -18,8 +18,9 @@ class FavoriteCreateSerializer(serializers.ModelSerializer):
         return Favorite.objects.create(user=user, **validated_data)
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    vehicle = VehicleDetailSerializer(read_only=True)  
+    vehicle_details = VehicleDetailSerializer(source='vehicle', read_only=True)
+    created_at = serializers.DateTimeField(source='added_at', read_only=True)
 
     class Meta:
         model = Favorite
-        fields = ['id', 'vehicle', 'added_at']
+        fields = ['id', 'user', 'vehicle', 'vehicle_details', 'created_at']
