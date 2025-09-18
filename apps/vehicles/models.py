@@ -3,6 +3,18 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator, ValidationError
 from datetime import datetime
 
+VEHICLE_TYPE_CHOICES = [
+    ('car', 'Car'),
+    ('motorcycle', 'Motorcycle'),
+    ('truck', 'Truck'),
+    ('trailer', 'Trailer'),
+    ('specialtech', 'Special Tech'),
+    ('bus', 'Bus'),
+    ('watertransport', 'Water Transport'),
+    ('airtransport', 'Air Transport'),
+    ('motorhome', 'Motorhome'),
+]
+
 FUEL_TYPE_CHOICES = [
     ('petrol', 'Petrol'),
     ('diesel', 'Diesel'),
@@ -43,6 +55,13 @@ class Vehicle(models.Model):
         related_name='vehicles',
         verbose_name='Owner',
         help_text='User who created the vehicle listing'
+    )
+    vehicle_type = models.CharField(
+        max_length=20,
+        choices=VEHICLE_TYPE_CHOICES,
+        default='car',
+        verbose_name='Vehicle Type',
+        help_text='Type of vehicle'
     )
     brand = models.CharField(max_length=50, verbose_name='Brand')
     model = models.CharField(max_length=50, verbose_name='Model')
