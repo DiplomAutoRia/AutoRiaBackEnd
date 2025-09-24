@@ -109,8 +109,6 @@ class VehicleSerializer(serializers.ModelSerializer):
     )
     images = VehicleImageSerializer(many=True, read_only=True)
 
-    vehicle_type = serializers.CharField(write_only=True, required=True, help_text='Type of vehicle (e.g., car, motorcycle)')
-
     body_type = serializers.CharField(write_only=True, required=False, allow_blank=True)
     drive_type = serializers.CharField(write_only=True, required=False, allow_blank=True)
     technical_condition = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -146,11 +144,11 @@ class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
         fields = [
-            'id', 'user', 'brand', 'model', 'year', 'price', 'currency', 'description', 'location',
+            'id', 'user', 'vehicle_type', 'brand', 'model', 'year', 'price', 'currency', 'description', 'location',
             'mileage', 'color', 'engine_volume', 'engine_power', 'fuel_type', 'transmission',
             'registration_country', 'is_custom_cleared', 'vin_code', 'number_of_owners',
             'is_active', 'views_count', 'created_at', 'updated_at', 'images',
-            'uploaded_images', 'vehicle_type', 
+            'uploaded_images',
 
             'car', 'motorcycle', 'truck', 'trailer', 'specialtech',
             'bus', 'watertransport', 'airtransport', 'motorhome',
@@ -213,8 +211,6 @@ class VehicleSerializer(serializers.ModelSerializer):
             elif data.get('location') is None and user_location:
                 data['location'] = user_location
 
-            if 'vehicle_type' in data:
-                raise serializers.ValidationError({"vehicle_type": "Vehicle type cannot be changed after creation."})
 
         return data
 
@@ -232,6 +228,7 @@ class VehicleSerializer(serializers.ModelSerializer):
         base_vehicle_fields = {f.name for f in Vehicle._meta.fields}
 
         base_data_for_subclass = {k: v for k, v in validated_data.items() if k in base_vehicle_fields}
+        base_data_for_subclass['vehicle_type'] = vehicle_type
         subclass_specific_data = {}
 
         if vehicle_type == 'car':
@@ -284,8 +281,7 @@ class VehicleSerializer(serializers.ModelSerializer):
             
     @transaction.atomic
     def update(self, instance, validated_data):
-        uploaded_images = validated_data.pop('uploaded_images', [])
-        validated_data.pop('vehicle_type', None) 
+        uploaded_images = validated_data.pop('uploaded_images', []) 
 
         base_model_field_names = {field.name for field in Vehicle._meta.fields}
         
@@ -390,10 +386,10 @@ class VehicleDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
         fields = [
-            'id', 'user', 'brand', 'model', 'year', 'price', 'currency', 'description', 
-            'location', 'mileage', 'color', 'engine_volume', 'engine_power', 'fuel_type', 
-            'transmission', 'registration_country', 'is_custom_cleared', 'vin_code', 
-            'number_of_owners', 'is_active', 'views_count', 'created_at', 'updated_at', 
+            'id', 'user', 'vehicle_type', 'brand', 'model', 'year', 'price', 'currency', 'description',
+            'location', 'mileage', 'color', 'engine_volume', 'engine_power', 'fuel_type',
+            'transmission', 'registration_country', 'is_custom_cleared', 'vin_code',
+            'number_of_owners', 'is_active', 'views_count', 'created_at', 'updated_at',
             'images',
             'car', 'motorcycle', 'truck', 'trailer', 'specialtech',
             'bus', 'watertransport', 'airtransport', 'motorhome',
