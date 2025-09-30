@@ -115,6 +115,7 @@ class Vehicle(models.Model):
             RegexValidator(regex=r'^[A-HJ-NPR-Z0-9]{11,17}$', message='Invalid VIN')
         ]
     )
+    is_new = models.BooleanField(default=False, verbose_name='Is New', help_text='Is vehicle new or used')
     is_active = models.BooleanField(default=True, verbose_name='Active')
     views_count = models.PositiveIntegerField(default=0, verbose_name='View count')
     number_of_owners = models.PositiveIntegerField(

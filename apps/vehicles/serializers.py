@@ -146,7 +146,7 @@ class VehicleSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'vehicle_type', 'brand', 'model', 'year', 'price', 'currency', 'description', 'location',
             'mileage', 'color', 'engine_volume', 'engine_power', 'fuel_type', 'transmission',
-            'registration_country', 'is_custom_cleared', 'vin_code', 'number_of_owners',
+            'registration_country', 'is_custom_cleared', 'vin_code', 'number_of_owners', 'is_new',
             'is_active', 'views_count', 'created_at', 'updated_at', 'images',
             'uploaded_images',
 
@@ -177,6 +177,7 @@ class VehicleSerializer(serializers.ModelSerializer):
             'transmission': {'required': False, 'allow_blank': True},
             'registration_country': {'required': False, 'allow_blank': True},
             'is_custom_cleared': {'required': False},
+            'is_new': {'required': False},
             'vin_code': {'required': False, 'allow_blank': True},
             'number_of_owners': {'required': False},
         }
@@ -389,7 +390,7 @@ class VehicleDetailSerializer(serializers.ModelSerializer):
             'id', 'user', 'vehicle_type', 'brand', 'model', 'year', 'price', 'currency', 'description',
             'location', 'mileage', 'color', 'engine_volume', 'engine_power', 'fuel_type',
             'transmission', 'registration_country', 'is_custom_cleared', 'vin_code',
-            'number_of_owners', 'is_active', 'views_count', 'created_at', 'updated_at',
+            'number_of_owners', 'is_new', 'is_active', 'views_count', 'created_at', 'updated_at',
             'images',
             'car', 'motorcycle', 'truck', 'trailer', 'specialtech',
             'bus', 'watertransport', 'airtransport', 'motorhome',

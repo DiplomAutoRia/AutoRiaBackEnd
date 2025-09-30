@@ -21,6 +21,7 @@ class VehicleFilter(django_filters.FilterSet):
     currency = django_filters.CharFilter(method='filter_multiple_currencies')
     location = django_filters.CharFilter(method='filter_multiple_locations')
     registration_country = django_filters.CharFilter(method='filter_multiple_countries')
+    is_new = django_filters.BooleanFilter()
     is_custom_cleared = django_filters.BooleanFilter()
     number_of_owners = django_filters.NumberFilter()
 
@@ -163,9 +164,10 @@ class VehicleFilter(django_filters.FilterSet):
             'mileage': ['gte', 'lte'],
             'engine_volume': ['gte', 'lte'],
             'engine_power': ['gte', 'lte'],
+            'is_new': ['exact'],
             'is_custom_cleared': ['exact'],
             'number_of_owners': ['exact'],
-            
+
             'fuel_type': ['icontains'],
             'transmission': ['icontains'],
             'color': ['icontains'],
